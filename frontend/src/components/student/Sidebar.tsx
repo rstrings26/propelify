@@ -10,7 +10,8 @@ import {
     PieChart,
     Settings,
     LogOut,
-    ChevronLeft
+    ChevronLeft,
+    MessageCircle
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -18,6 +19,7 @@ const navItems = [
     { name: "Dashboard", href: "/student/dashboard", icon: LayoutDashboard },
     { name: "Past Papers", href: "/student/past-papers", icon: FileText },
     { name: "Topicals", href: "/student/topicals", icon: Layers },
+    { name: "Ask Question", href: "/student/ask", icon: MessageCircle },
     { name: "Bookmarks", href: "/student/bookmarks", icon: Bookmark },
     { name: "Progress", href: "/student/progress", icon: PieChart },
 ];

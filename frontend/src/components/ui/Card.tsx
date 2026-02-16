@@ -2,6 +2,7 @@ import { cn } from '@/lib/utils';
 import { HTMLAttributes, forwardRef } from 'react';
 
 export interface CardProps extends HTMLAttributes<HTMLDivElement> {}
+export interface CardContentProps extends HTMLAttributes<HTMLDivElement> {}
 
 const Card = forwardRef<HTMLDivElement, CardProps>(
   ({ className, ...props }, ref) => {
@@ -20,4 +21,12 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
 
 Card.displayName = 'Card';
 
-export { Card };
+const CardContent = forwardRef<HTMLDivElement, CardContentProps>(
+  ({ className, ...props }, ref) => (
+    <div ref={ref} className={cn('', className)} {...props} />
+  )
+);
+
+CardContent.displayName = 'CardContent';
+
+export { Card, CardContent };
