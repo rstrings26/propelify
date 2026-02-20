@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Check, ChevronLeft, Calendar } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 const levels = ["O Level"];
 const subjectsList = [
@@ -45,17 +46,54 @@ export default function StudentOnboarding() {
     examSession: "",
   });
 
-  const nextStep = () => {
+  // Pre-populate name from user metadata if available (e.g., from Google OAuth)
+  useEffect(() => {
+    const loadUserData = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const fullName = user.user_metadata?.full_name || user.user_metadata?.name || "";
+        if (fullName && !formData.name) {
+          setFormData(prev => ({ ...prev, name: fullName }));
+        }
+      }
+    };
+    loadUserData();
+  }, []);
+
+  const nextStep = async () => {
     if (step < 3) {
       setDirection(1);
       setStep(step + 1);
     } else {
-      // Submit logic here
-      console.log("Submitting:", formData);
-      // Save name to localStorage for personalization in this prototype
-      if (typeof window !== "undefined") {
-        localStorage.setItem("studentName", formData.name);
+      // Submit onboarding data to database
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (user) {
+          const { error } = await supabase
+            .from("profiles")
+            .update({
+              full_name: formData.name,
+              level: formData.level,
+              selected_subjects: formData.subjects,
+              target_exam_session: formData.examSession,
+              onboarding_complete: true,
+            })
+            .eq("id", user.id);
+
+          if (error) {
+            console.error("Error updating profile:", error);
+          }
+
+          // Save to localStorage for quick access
+          if (typeof window !== "undefined") {
+            localStorage.setItem("studentName", formData.name);
+          }
+        }
+      } catch (error) {
+        console.error("Error in onboarding:", error);
       }
+      
       router.push("/student/dashboard");
     }
   };

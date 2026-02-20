@@ -11,11 +11,14 @@ import {
     Settings,
     LogOut,
     ChevronLeft,
-    MessageCircle
+    MessageCircle,
+    Home
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useAuth } from "@/lib/AuthContext";
 
 const navItems = [
+    { name: "Home", href: "/", icon: Home },
     { name: "Dashboard", href: "/student/dashboard", icon: LayoutDashboard },
     { name: "Past Papers", href: "/student/past-papers", icon: FileText },
     { name: "Topicals", href: "/student/topicals", icon: Layers },
@@ -26,6 +29,19 @@ const navItems = [
 
 export default function StudentSidebar({ isOpen, onClose }: { isOpen?: boolean, onClose?: () => void }) {
     const pathname = usePathname();
+    const { signOut } = useAuth();
+
+    const handleLogout = async () => {
+        try {
+            console.log("Logging out...");
+            await signOut();
+            console.log("Logout successful");
+        } catch (error) {
+            console.error("Logout error:", error);
+        } finally {
+            if (onClose) onClose();
+        }
+    };
 
     return (
         <>
@@ -88,10 +104,13 @@ export default function StudentSidebar({ isOpen, onClose }: { isOpen?: boolean, 
                         <Settings size={20} />
                         <span>Settings</span>
                     </Link>
-                    <Link href="/" className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-red-500 rounded-xl hover:bg-red-50 transition-colors text-left">
+                    <button 
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-red-500 rounded-xl hover:bg-red-50 transition-colors text-left"
+                    >
                         <LogOut size={20} />
                         <span>Log Out</span>
-                    </Link>
+                    </button>
                 </div>
             </aside>
         </>

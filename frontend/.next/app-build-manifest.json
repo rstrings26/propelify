@@ -26,10 +26,20 @@
       "static/chunks/main-app.js",
       "static/chunks/app/student/layout.js"
     ],
-    "/student/ask/page": [
+    "/student/past-papers/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/student/ask/page.js"
+      "static/chunks/app/student/past-papers/page.js"
+    ],
+    "/auth/callback/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/auth/callback/page.js"
+    ],
+    "/past-papers/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/past-papers/page.js"
     ]
   }
 }

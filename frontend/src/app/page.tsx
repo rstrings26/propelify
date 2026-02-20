@@ -4,8 +4,11 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { Play, BookOpen, Users, Award, TrendingUp, CheckCircle, ArrowRight, Mail, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useAuth } from '@/lib/AuthContext';
 
 export default function HomePage() {
+  const { user, profile } = useAuth();
+  
   return (
     <main className="min-h-screen bg-white text-slate-900 font-sans selection:bg-brand-pink selection:text-white overflow-x-hidden">
       {/* Navbar */}
@@ -26,18 +29,42 @@ export default function HomePage() {
           <div className="hidden md:flex items-center gap-8 font-semibold text-slate-600">
             <a href="#features" className="cursor-pointer hover:text-brand-burgundy transition-colors">Features</a>
             <a href="#how-it-works" className="cursor-pointer hover:text-brand-burgundy transition-colors">How It Works</a>
+            <Link href="/past-papers" className="cursor-pointer hover:text-brand-burgundy transition-colors">Past Papers</Link>
             <Link href="/admin/login" className="cursor-pointer hover:text-brand-burgundy transition-colors">Admin</Link>
           </div>
 
           <div className="flex items-center gap-4">
-            <Link href="/login" className="hidden md:block font-bold text-slate-700 hover:text-brand-burgundy mr-2">
-              Log In
-            </Link>
-            <Link href="/signup">
-              <Button className="bg-brand-red hover:bg-brand-red/90 text-white font-bold rounded-none px-8 h-12 shadow-lg shadow-brand-red/20 text-md transition-transform hover:scale-105 active:scale-95 border-0">
-                Signup
-              </Button>
-            </Link>
+            {user && profile ? (
+              <>
+                <Link href={
+                  profile.role === "teacher" ? "/teacher/dashboard" :
+                  profile.role === "admin" ? "/admin/dashboard" :
+                  "/student/dashboard"
+                } className="hidden md:block font-bold text-slate-700 hover:text-brand-burgundy mr-2">
+                  My Dashboard
+                </Link>
+                <Link href={
+                  profile.role === "teacher" ? "/teacher/dashboard" :
+                  profile.role === "admin" ? "/admin/dashboard" :
+                  "/student/dashboard"
+                }>
+                  <Button className="bg-brand-red hover:bg-brand-red/90 text-white font-bold rounded-none px-8 h-12 shadow-lg shadow-brand-red/20 text-md transition-transform hover:scale-105 active:scale-95 border-0">
+                    Go to Dashboard
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className="hidden md:block font-bold text-slate-700 hover:text-brand-burgundy mr-2">
+                  Log In
+                </Link>
+                <Link href="/signup">
+                  <Button className="bg-brand-red hover:bg-brand-red/90 text-white font-bold rounded-none px-8 h-12 shadow-lg shadow-brand-red/20 text-md transition-transform hover:scale-105 active:scale-95 border-0">
+                    Signup
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </motion.nav>
@@ -67,16 +94,30 @@ export default function HomePage() {
             transition={{ delay: 0.6 }}
             className="flex items-center gap-4"
           >
-            <Link href="/signup">
-              <Button className="bg-brand-burgundy hover:bg-brand-burgundy/90 text-white font-bold rounded-none px-10 h-14 shadow-xl shadow-brand-burgundy/30 text-lg transition-all hover:scale-105 active:scale-95">
-                Get Started <ArrowRight className="ml-2" size={20} />
-              </Button>
-            </Link>
-            <Link href="/login">
-              <Button className="bg-transparent border-2 border-brand-burgundy text-brand-burgundy hover:bg-brand-burgundy hover:text-white font-bold rounded-none px-10 h-14 text-lg transition-all">
-                Explore
-              </Button>
-            </Link>
+            {user && profile ? (
+              <Link href={
+                profile.role === "teacher" ? "/teacher/dashboard" :
+                profile.role === "admin" ? "/admin/dashboard" :
+                "/student/dashboard"
+              }>
+                <Button className="bg-brand-burgundy hover:bg-brand-burgundy/90 text-white font-bold rounded-none px-10 h-14 shadow-xl shadow-brand-burgundy/30 text-lg transition-all hover:scale-105 active:scale-95">
+                  Go to Dashboard <ArrowRight className="ml-2" size={20} />
+                </Button>
+              </Link>
+            ) : (
+              <>
+                <Link href="/signup">
+                  <Button className="bg-brand-burgundy hover:bg-brand-burgundy/90 text-white font-bold rounded-none px-10 h-14 shadow-xl shadow-brand-burgundy/30 text-lg transition-all hover:scale-105 active:scale-95">
+                    Get Started <ArrowRight className="ml-2" size={20} />
+                  </Button>
+                </Link>
+                <Link href="/login">
+                  <Button className="bg-transparent border-2 border-brand-burgundy text-brand-burgundy hover:bg-brand-burgundy hover:text-white font-bold rounded-none px-10 h-14 text-lg transition-all">
+                    Explore
+                  </Button>
+                </Link>
+              </>
+            )}
           </motion.div>
 
           {/* Stats */}
@@ -294,13 +335,31 @@ export default function HomePage() {
           viewport={{ once: true }}
           className="max-w-[1400px] mx-auto text-center"
         >
-          <h2 className="text-5xl md:text-6xl font-black mb-6">Ready to <span className="text-brand-pink">Propel</span> Your Success?</h2>
-          <p className="text-xl text-slate-400 mb-10 max-w-2xl mx-auto">Join thousands of students achieving their dream grades</p>
-          <Link href="/signup">
-            <Button className="bg-brand-pink hover:bg-brand-pink/90 text-white font-bold rounded-none px-12 h-16 shadow-xl shadow-brand-pink/30 text-xl transition-all hover:scale-105">
-              Start Learning Today <ArrowRight className="ml-2" size={24} />
-            </Button>
-          </Link>
+          {user && profile ? (
+            <>
+              <h2 className="text-5xl md:text-6xl font-black mb-6">Welcome Back, <span className="text-brand-pink">{profile.full_name?.split(' ')[0] || 'Student'}</span>!</h2>
+              <p className="text-xl text-slate-400 mb-10 max-w-2xl mx-auto">Continue your learning journey and achieve your goals</p>
+              <Link href={
+                profile.role === "teacher" ? "/teacher/dashboard" :
+                profile.role === "admin" ? "/admin/dashboard" :
+                "/student/dashboard"
+              }>
+                <Button className="bg-brand-pink hover:bg-brand-pink/90 text-white font-bold rounded-none px-12 h-16 shadow-xl shadow-brand-pink/30 text-xl transition-all hover:scale-105">
+                  Continue Learning <ArrowRight className="ml-2" size={24} />
+                </Button>
+              </Link>
+            </>
+          ) : (
+            <>
+              <h2 className="text-5xl md:text-6xl font-black mb-6">Ready to <span className="text-brand-pink">Propel</span> Your Success?</h2>
+              <p className="text-xl text-slate-400 mb-10 max-w-2xl mx-auto">Join thousands of students achieving their dream grades</p>
+              <Link href="/signup">
+                <Button className="bg-brand-pink hover:bg-brand-pink/90 text-white font-bold rounded-none px-12 h-16 shadow-xl shadow-brand-pink/30 text-xl transition-all hover:scale-105">
+                  Start Learning Today <ArrowRight className="ml-2" size={24} />
+                </Button>
+              </Link>
+            </>
+          )}
         </motion.div>
       </section>
 
@@ -334,7 +393,7 @@ export default function HomePage() {
             <div>
               <h3 className="text-lg font-bold mb-4">Resources</h3>
               <ul className="space-y-2 text-slate-400">
-                <li><a href="#" className="hover:text-brand-pink transition-colors">Past Papers</a></li>
+                <li><Link href="/past-papers" className="hover:text-brand-pink transition-colors">Past Papers</Link></li>
                 <li><a href="#" className="hover:text-brand-pink transition-colors">Topical Questions</a></li>
                 <li><a href="#" className="hover:text-brand-pink transition-colors">Study Guides</a></li>
                 <li><a href="#" className="hover:text-brand-pink transition-colors">Progress Tracking</a></li>
