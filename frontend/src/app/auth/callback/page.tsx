@@ -8,6 +8,45 @@ export default function AuthCallback() {
 
   useEffect(() => {
     const handleCallback = async () => {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get("code");
+
+        if (code) {
+          const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+          if (exchangeError) {
+            console.error("Error exchanging auth code:", exchangeError);
+            router.push("/login?error=auth_failed");
+            return;
+          }
+        } else if (window.location.hash) {
+          const hashParams = new URLSearchParams(window.location.hash.slice(1));
+          const accessToken = hashParams.get("access_token");
+          const refreshToken = hashParams.get("refresh_token");
+
+          if (accessToken && refreshToken) {
+            const { error: setSessionError } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken,
+            });
+
+            if (setSessionError) {
+              console.error("Error setting session from hash:", setSessionError);
+              router.push("/login?error=auth_failed");
+              return;
+            }
+          }
+        }
+
+        if (window.location.hash) {
+          window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+        }
+      } catch (error) {
+        console.error("Error handling auth callback:", error);
+        router.push("/login?error=auth_failed");
+        return;
+      }
+
       const { data: { session }, error } = await supabase.auth.getSession();
       
       if (error) {

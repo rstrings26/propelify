@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { apiCall } from "@/lib/api";
 
 interface Message {
   id: string;
@@ -62,7 +63,7 @@ export default function Chatbot() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:3001/rag/query", {
+      const response = await apiCall("/rag/query", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

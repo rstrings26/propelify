@@ -29,6 +29,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Check active sessions and subscribe to auth changes
     const initAuth = async () => {
       try {
+        if (typeof window !== "undefined" && window.location.hash) {
+          const hashParams = new URLSearchParams(window.location.hash.slice(1));
+          const accessToken = hashParams.get("access_token");
+          const refreshToken = hashParams.get("refresh_token");
+
+          if (accessToken && refreshToken) {
+            const { error: setSessionError } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken,
+            });
+
+            if (setSessionError) {
+              console.error("Error setting session from URL hash:", setSessionError);
+            }
+          }
+
+          window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+        }
+
         // Get initial session
         const { data: { session } } = await supabase.auth.getSession();
         

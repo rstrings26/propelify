@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { FileText, Download, Eye, Search, Filter, Calendar, Book } from "lucide-react";
+import { apiCall } from "@/lib/api";
 
 interface PaperFile {
   id: string;
@@ -39,7 +40,7 @@ export default function GoogleDrivePapersPage() {
 
   const fetchPapers = async () => {
     try {
-      const response = await fetch("http://localhost:3001/papers/drive/list");
+      const response = await apiCall("/papers/drive/list");
       const data = await response.json();
       setPapers(data.files || []);
       setFilteredPapers(data.files || []);

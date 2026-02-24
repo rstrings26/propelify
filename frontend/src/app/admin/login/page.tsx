@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
+import { apiCall } from "@/lib/api";
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
@@ -12,7 +13,7 @@ export default function AdminLoginPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    const res = await fetch("http://localhost:3001/admin/login", {
+    const res = await apiCall("/admin/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),

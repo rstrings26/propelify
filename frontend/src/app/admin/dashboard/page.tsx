@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { UserPlus, Shield, Check, AlertCircle } from "lucide-react";
+import { apiCall } from "@/lib/api";
 
 export default function AdminDashboard() {
   const [formData, setFormData] = useState({ name: "", email: "", password: "" });
@@ -14,7 +15,7 @@ export default function AdminDashboard() {
     setMessage("");
 
     try {
-      const res = await fetch("http://localhost:3001/admin/add-teacher", {
+      const res = await apiCall("/admin/add-teacher", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

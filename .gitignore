@@ -9,9 +9,11 @@ node_modules/
 # next.js
 /.next/
 /out/
+frontend/.next/
 
 # production
 /build
+backend/dist/
 
 # misc
 .DS_Store
@@ -32,3 +34,4 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+frontend/tsconfig.tsbuildinfo

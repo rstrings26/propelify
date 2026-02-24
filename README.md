@@ -1,91 +1,152 @@
-# Education Platform - Production-Ready
+# Propel Education Platform
 
-A complete educational platform with authentication, role-based access, Google OAuth, AI chatbot, and past papers library.
+Monorepo for a production-ready education platform with:
 
-## 🚀 Quick Deploy
+- Next.js 14 frontend (`frontend`)
+- Express + TypeScript backend (`backend`)
+- Supabase auth/profile data
+- Google OAuth login
+- Past papers + Drive browsing
+- RAG chatbot via Groq
 
-**Ready to deploy?** Follow these guides in order:
+## Repository Structure
 
-1. **[PRE-DEPLOYMENT-CHECKLIST.md](./PRE-DEPLOYMENT-CHECKLIST.md)** - Complete this first! (5 min)
-2. **[QUICK-DEPLOY.md](./QUICK-DEPLOY.md)** - Step-by-step deployment (15 min)
-3. **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Detailed guide with troubleshooting
+```text
+.
+├─ frontend/                 # Next.js app
+├─ backend/                  # Express API
+├─ package.json              # root convenience scripts
+└─ vercel.json               # Vercel build/install commands
+```
 
-**Total deployment time: ~20 minutes**
+## Local Development
 
----
+### 1) Install dependencies
 
-## Features
-
-- ✅ Next.js 14 with App Router & TypeScript
-- ✅ Supabase Authentication (Email + Google OAuth)
-- ✅ Role-based routing (Student/Teacher/Admin)
-- ✅ AI Chatbot powered by Groq
-- ✅ Past Papers Library with Google Drive integration
-- ✅ Modern UI with Framer Motion animations
-- ✅ Session management & auto-login
-- ✅ Onboarding flow for new users
-- ✅ Public landing page
-
-## Getting Started
-
-1. Install dependencies:
 ```bash
 npm install
+cd frontend && npm install
+cd ../backend && npm install
 ```
 
-2. Create environment file:
+### 2) Configure environment variables
+
+#### Frontend (`frontend/.env.local`)
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+NEXT_PUBLIC_API_URL=http://localhost:3001
+```
+
+#### Backend (`backend/.env`)
+
+```env
+PORT=3001
+NODE_ENV=development
+
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+SUPABASE_JWKS_URL=https://your-project.supabase.co/auth/v1/jwks
+SUPABASE_JWT_ISSUER=https://your-project.supabase.co/auth/v1
+
+DATABASE_URL=postgresql://postgres:password@db.your-project.supabase.co:5432/postgres
+
+FRONTEND_URL=http://localhost:3000
+
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GOOGLE_REDIRECT_URI=http://localhost:3001/auth/google/callback
+GOOGLE_REFRESH_TOKEN=your-google-refresh-token
+
+GROQ_API_KEY=your-groq-api-key
+GROQ_MODEL=gemma-7b-it
+
+OLLAMA_URL=http://localhost:11434
+OLLAMA_MODEL=bge-m3
+```
+
+### 3) Run apps
+
+From repo root:
+
 ```bash
-cp .env.example .env
+npm run backend:dev
+npm run frontend:dev
 ```
 
-3. Run development server:
+Or run both together:
+
 ```bash
 npm run dev
 ```
 
-4. Open [http://localhost:3000](http://localhost:3000)
+## Build Commands
 
-## Project Structure
+### Frontend
 
-```
-/
-├── src/
-│   ├── app/                    # Next.js App Router
-│   │   ├── (public)/          # Public marketing pages
-│   │   ├── (auth)/            # Authentication pages
-│   │   ├── app/               # Student area (protected)
-│   │   ├── teacher/           # Teacher portal (role-gated)
-│   │   └── admin/             # Admin portal (role-gated)
-│   ├── components/            # React components
-│   │   ├── ui/               # Design system
-│   │   ├── layouts/          # Layout components
-│   │   ├── auth/             # Auth components
-│   │   └── common/           # Shared components
-│   ├── lib/                  # Utilities & helpers
-│   ├── hooks/                # Custom React hooks
-│   ├── types/                # TypeScript types
-│   └── middleware.ts         # Route protection
-└── public/                   # Static assets
+```bash
+cd frontend
+npm run build
 ```
 
-## Roles & Access
+### Backend
 
-- **Student**: Access to `/app/*` routes
-- **Teacher**: Access to `/teacher/*` routes
-- **Admin**: Access to `/admin/*` routes (full access)
+```bash
+cd backend
+npm run build
+```
 
-## Technology Stack
+## Deployment
 
-- Next.js 14
-- TypeScript
-- Tailwind CSS
-- React 18
-- Lucide Icons
+### Backend (Railway)
 
-## Scripts
+- Root directory: `backend`
+- Install command: `npm install`
+- Build command: `npm run build`
+- Start command: `npm start`
+- Set backend env vars from the section above (production values)
+- Set `FRONTEND_URL` to your Vercel URL
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm start` - Start production server
-- `npm run lint` - Run ESLint
-- `npm run type-check` - Run TypeScript type checking
+### Frontend (Vercel)
+
+- Root directory: `frontend`
+- Install command: `npm install`
+- Build command: `npm run build`
+- Set frontend env vars:
+	- `NEXT_PUBLIC_SUPABASE_URL`
+	- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+	- `NEXT_PUBLIC_API_URL` (Railway backend URL)
+
+## Useful Scripts
+
+### Root
+
+- `npm run dev` — run frontend + backend together
+- `npm run frontend:dev`
+- `npm run backend:dev`
+- `npm run frontend:build`
+- `npm run backend:build`
+
+### Frontend (`frontend/package.json`)
+
+- `npm run dev`
+- `npm run build`
+- `npm start`
+- `npm run lint`
+- `npm run type-check`
+
+### Backend (`backend/package.json`)
+
+- `npm run dev`
+- `npm run build`
+- `npm start`
+- `npm run type-check`
+- `npm run setup:google`
+- `npm run make-public`
+
+## Notes
+
+- Keep `NEXT_PUBLIC_API_URL` as your deployed backend URL in production (not localhost).
+- If using Google OAuth, ensure redirect URIs are configured in Google Cloud and Supabase.
+- Frontend production build currently passes cleanly.

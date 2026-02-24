@@ -8,6 +8,7 @@ import {
     Calendar, FolderOpen, FileCheck, ClipboardList, BookMarked, Home, LogIn
 } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
+import { apiCall } from "@/lib/api";
 
 interface FolderItem {
     id: string;
@@ -77,7 +78,7 @@ export default function PublicPastPapersPage() {
             setError(null);
 
             // Browse root folder (no folderId means use default from env)
-            const response = await fetch('http://localhost:3001/papers/browse');
+            const response = await apiCall('/papers/browse');
 
             if (!response.ok) {
                 throw new Error('Failed to load folders');
@@ -105,7 +106,7 @@ export default function PublicPastPapersPage() {
         try {
             setLoadingFolders(prev => new Set(prev).add(folderId));
 
-            const response = await fetch(`http://localhost:3001/papers/browse/${folderId}`);
+            const response = await apiCall(`/papers/browse/${folderId}`);
 
             if (!response.ok) {
                 throw new Error('Failed to load folder');
@@ -156,7 +157,8 @@ export default function PublicPastPapersPage() {
     const handleDownload = (paper: FolderItem) => {
         if (paper.downloadUrl) {
             const link = document.createElement('a');
-            link.href = `http://localhost:3001${paper.downloadUrl}`;
+            const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+            link.href = `${baseUrl}${paper.downloadUrl}`;
             link.download = paper.name;
             document.body.appendChild(link);
             link.click();
@@ -477,7 +479,7 @@ export default function PublicPastPapersPage() {
                                 </div>
                             </div>
                             <iframe
-                                src={`http://localhost:3001${viewingPaper.embedUrl}`}
+                                src={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}${viewingPaper.embedUrl}`}
                                 className="flex-1 w-full"
                                 title="PDF Viewer"
                             />
