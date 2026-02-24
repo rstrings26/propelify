@@ -51,8 +51,7 @@ export default function SignupPage() {
             school: school,
             city: city,
             country: country,
-            region_school: `${school}, ${city}, ${country}`,
-            onboarding_complete: true, // Mark as complete since they provided all info
+            region_school: `${school}, ${city}, ${country}`
           }
         }
       });

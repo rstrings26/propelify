@@ -47,7 +47,7 @@ function LoginPageContent() {
         // Fetch user role from profiles table
         const { data: profile, error: profileError } = await supabase
           .from("profiles")
-          .select("role, full_name, onboarding_complete")
+          .select("role, full_name")
           .eq("id", data.user.id)
           .single();
 
@@ -58,11 +58,9 @@ function LoginPageContent() {
           return;
         }
 
-        // The AuthContext will handle the redirect automatically
-        // Just refresh to trigger the context
+        // Redirect to appropriate dashboard (no onboarding)
         window.location.href = profile?.role === "teacher" ? "/teacher/dashboard" :
                                profile?.role === "admin" ? "/admin/dashboard" :
-                               !profile?.onboarding_complete ? "/onboarding" :
                                "/student/dashboard";
       }
     } catch (err) {

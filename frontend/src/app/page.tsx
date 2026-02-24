@@ -35,24 +35,15 @@ export default function HomePage() {
 
           <div className="flex items-center gap-4">
             {user && profile ? (
-              <>
-                <Link href={
-                  profile.role === "teacher" ? "/teacher/dashboard" :
-                  profile.role === "admin" ? "/admin/dashboard" :
-                  "/student/dashboard"
-                } className="hidden md:block font-bold text-slate-700 hover:text-brand-burgundy mr-2">
-                  My Dashboard
-                </Link>
-                <Link href={
-                  profile.role === "teacher" ? "/teacher/dashboard" :
-                  profile.role === "admin" ? "/admin/dashboard" :
-                  "/student/dashboard"
-                }>
-                  <Button className="bg-brand-red hover:bg-brand-red/90 text-white font-bold rounded-none px-8 h-12 shadow-lg shadow-brand-red/20 text-md transition-transform hover:scale-105 active:scale-95 border-0">
-                    Go to Dashboard
-                  </Button>
-                </Link>
-              </>
+              <Link href={
+                profile.role === "teacher" ? "/teacher/dashboard" :
+                profile.role === "admin" ? "/admin/dashboard" :
+                "/student/dashboard"
+              }>
+                <Button className="bg-brand-red hover:bg-brand-red/90 text-white font-bold rounded-none px-8 h-12 shadow-lg shadow-brand-red/20 text-md transition-transform hover:scale-105 active:scale-95 border-0">
+                  Go to Dashboard
+                </Button>
+              </Link>
             ) : (
               <>
                 <Link href="/login" className="hidden md:block font-bold text-slate-700 hover:text-brand-burgundy mr-2">
@@ -104,7 +95,6 @@ export default function HomePage() {
                   Go to Dashboard <ArrowRight className="ml-2" size={20} />
                 </Button>
               </Link>
-            ) : (
               <>
                 <Link href="/signup">
                   <Button className="bg-brand-burgundy hover:bg-brand-burgundy/90 text-white font-bold rounded-none px-10 h-14 shadow-xl shadow-brand-burgundy/30 text-lg transition-all hover:scale-105 active:scale-95">

@@ -56,25 +56,25 @@ export default function AuthCallback() {
       }
       
       if (session) {
-        // Get user profile to determine role and onboarding status
+        // Get user profile to determine role
         const { data: profile } = await supabase
           .from("profiles")
-          .select("role, full_name, onboarding_complete")
+          .select("role, full_name")
           .eq("id", session.user.id)
           .single();
         
         if (profile) {
-          // AuthContext will handle the redirect based on role and onboarding status
-          if (!profile.onboarding_complete) {
-            router.push("/onboarding");
-          } else if (profile.role === "teacher") {
+          // Redirect based on role (no onboarding)
+          if (profile.role === "teacher") {
             router.push("/teacher/dashboard");
+          } else if (profile.role === "admin") {
+            router.push("/admin/dashboard");
           } else {
             router.push("/student/dashboard");
           }
         } else {
-          // No profile yet, go to onboarding
-          router.push("/onboarding");
+          // No profile yet, go directly to student dashboard
+          router.push("/student/dashboard");
         }
       } else {
         router.push("/login");

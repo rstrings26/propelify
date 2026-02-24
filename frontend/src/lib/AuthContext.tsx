@@ -98,7 +98,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const metadata = user.user_metadata || {};
-        const hasRegionSchool = metadata.region_school && metadata.region_school !== '';
         
         const { data: newProfile, error: createError } = await supabase
           .from("profiles")
@@ -107,8 +106,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             full_name: metadata.full_name || metadata.name || "",
             role: "student",
             region_school: metadata.region_school || "",
-            // If region_school exists, user filled manual form, skip onboarding
-            onboarding_complete: hasRegionSchool,
             level: metadata.level || "O Level",
           })
           .select()
@@ -169,11 +166,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } else if (profile.role === "admin") {
       router.push("/admin/dashboard");
     } else {
-      if (profile.onboarding_complete) {
-        router.push("/student/dashboard");
-      } else {
-        router.push("/onboarding");
-      }
+      router.push("/student/dashboard");
     }
   }, [profile, router]);
 
@@ -196,10 +189,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // If logged in but onboarding not complete (Google OAuth users), redirect to onboarding
-    if (user && profile && !profile.onboarding_complete && pathname !== "/onboarding" && !isPublicRoute) {
-      router.push("/onboarding");
-    }
+    // Auth is now smooth - no onboarding redirects needed
   }, [user, profile, loading, pathname, router, redirectToDashboard]);
 
   return (
