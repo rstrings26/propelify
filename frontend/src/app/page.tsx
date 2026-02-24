@@ -95,6 +95,7 @@ export default function HomePage() {
                   Go to Dashboard <ArrowRight className="ml-2" size={20} />
                 </Button>
               </Link>
+            ) : (
               <>
                 <Link href="/signup">
                   <Button className="bg-brand-burgundy hover:bg-brand-burgundy/90 text-white font-bold rounded-none px-10 h-14 shadow-xl shadow-brand-burgundy/30 text-lg transition-all hover:scale-105 active:scale-95">
