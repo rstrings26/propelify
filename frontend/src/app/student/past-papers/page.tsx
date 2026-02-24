@@ -17,6 +17,7 @@ interface FolderItem {
     viewUrl?: string;
     downloadUrl?: string;
     embedUrl?: string;
+    folderType?: string;
 }
 
 interface FolderCache {

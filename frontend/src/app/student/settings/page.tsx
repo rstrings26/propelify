@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { User, CreditCard } from "lucide-react";
 
 export default function SettingsPage() {
@@ -23,7 +24,13 @@ export default function SettingsPage() {
                     </h2>
                     <div className="flex items-center gap-6 mb-6">
                         <div className="w-20 h-20 bg-gray-200 rounded-full border-2 border-white shadow-md overflow-hidden">
-                            <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`} alt="Profile" />
+                            <Image
+                                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`}
+                                alt="Profile"
+                                width={80}
+                                height={80}
+                                className="w-full h-full object-cover"
+                            />
                         </div>
                         <div>
                             <button className="text-sm font-semibold text-primary border border-primary/20 px-4 py-2 rounded-lg hover:bg-primary/5 transition-colors">

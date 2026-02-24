@@ -54,7 +54,7 @@ export default function AdminDashboard() {
               Create Teacher Account
             </h2>
             <p className="text-sm text-gray-500 mt-1">
-              This will create a new user in Supabase with the 'teacher' role.
+              This will create a new user in Supabase with the &apos;teacher&apos; role.
             </p>
           </div>
 

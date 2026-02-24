@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import Image from "next/image";
 import { Bell, Flame, ArrowRight, BookOpen, Clock } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
 
@@ -18,7 +19,7 @@ export function DashboardHeader() {
                 <h1 className="text-3xl font-bold font-display text-gray-900">
                     Hello, {name} 👋
                 </h1>
-                <p className="text-gray-500">Let's make today productive.</p>
+                <p className="text-gray-500">Let&apos;s make today productive.</p>
             </div>
             <div className="flex items-center gap-4">
                 <div className="flex items-center gap-1 bg-highlight/10 text-highlight-foreground px-3 py-1.5 rounded-full text-sm font-semibold">
@@ -30,7 +31,7 @@ export function DashboardHeader() {
                     <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
                 </button>
                 <div className="w-10 h-10 rounded-full bg-gray-200 border-2 border-white shadow-sm overflow-hidden">
-                    <img src={photoUrl} alt="Profile" className="w-full h-full object-cover" />
+                    <Image src={photoUrl} alt="Profile" width={40} height={40} className="w-full h-full object-cover" />
                 </div>
             </div>
         </header>

@@ -319,7 +319,7 @@ export default function HomePage() {
                   <CheckCircle className="w-6 h-6 text-brand-yellow" />
                   <span className="font-bold text-brand-yellow">{testimonial.grade}</span>
                 </div>
-                <p className="text-lg mb-6 leading-relaxed">"{testimonial.quote}"</p>
+                <p className="text-lg mb-6 leading-relaxed">&ldquo;{testimonial.quote}&rdquo;</p>
                 <p className="font-bold text-white">{testimonial.name}</p>
               </motion.div>
             ))}

@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { User } from "@supabase/supabase-js";
 import { useRouter, usePathname } from "next/navigation";
@@ -142,6 +142,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const redirectToDashboard = useCallback(() => {
+    if (!profile) return;
+
+    if (profile.role === "teacher") {
+      router.push("/teacher/dashboard");
+    } else if (profile.role === "admin") {
+      router.push("/admin/dashboard");
+    } else {
+      if (profile.onboarding_complete) {
+        router.push("/student/dashboard");
+      } else {
+        router.push("/onboarding");
+      }
+    }
+  }, [profile, router]);
+
   // Auto-redirect based on auth state and route
   useEffect(() => {
     if (loading) return;
@@ -165,23 +181,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (user && profile && !profile.onboarding_complete && pathname !== "/onboarding" && !isPublicRoute) {
       router.push("/onboarding");
     }
-  }, [user, profile, loading, pathname]);
-
-  const redirectToDashboard = () => {
-    if (!profile) return;
-
-    if (profile.role === "teacher") {
-      router.push("/teacher/dashboard");
-    } else if (profile.role === "admin") {
-      router.push("/admin/dashboard");
-    } else {
-      if (profile.onboarding_complete) {
-        router.push("/student/dashboard");
-      } else {
-        router.push("/onboarding");
-      }
-    }
-  };
+  }, [user, profile, loading, pathname, router, redirectToDashboard]);
 
   return (
     <AuthContext.Provider value={{ user, profile, loading, signOut }}>

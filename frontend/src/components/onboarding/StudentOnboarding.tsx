@@ -52,8 +52,8 @@ export default function StudentOnboarding() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const fullName = user.user_metadata?.full_name || user.user_metadata?.name || "";
-        if (fullName && !formData.name) {
-          setFormData(prev => ({ ...prev, name: fullName }));
+        if (fullName) {
+          setFormData((prev) => (prev.name ? prev : { ...prev, name: fullName }));
         }
       }
     };

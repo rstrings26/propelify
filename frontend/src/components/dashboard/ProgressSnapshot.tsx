@@ -36,7 +36,7 @@ export default function ProgressSnapshot() {
 
             <div className="mt-6 pt-6 border-t border-gray-50">
                 <p className="text-xs text-gray-400 text-center">
-                    You're doing great! Try to focus on <span className="text-amber-600 font-medium">Physics</span> this week.
+                    You&apos;re doing great! Try to focus on <span className="text-amber-600 font-medium">Physics</span> this week.
                 </p>
             </div>
         </div>
