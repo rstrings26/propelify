@@ -6,6 +6,7 @@ import {
     Atom, Beaker, Calculator, BookOpen, Globe, Dna, FlaskConical, Languages,
     Calendar, FolderOpen, FileCheck, ClipboardList, BookMarked
 } from "lucide-react";
+import { apiCall } from "@/lib/api";
 
 interface FolderItem {
     id: string;
