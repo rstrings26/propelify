@@ -46,7 +46,7 @@ export default function PastPapersPage() {
             setError(null);
 
             // Browse root folder (no folderId means use default from env)
-            const response = await fetch('http://localhost:3001/papers/browse');
+            const response = await apiCall('/papers/browse');
 
             if (!response.ok) {
                 throw new Error('Failed to load folders');

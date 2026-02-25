@@ -2,15 +2,16 @@
 import React from "react";
 import Image from "next/image";
 import { Bell, Flame, ArrowRight, BookOpen, Clock } from "lucide-react";
-import { useAuth } from "@/lib/AuthContext";
+import { useUser } from "@clerk/nextjs";
+import { useClerkAuth } from "@/lib/useClerkAuth";
 
 export function DashboardHeader() {
-    const { user, profile } = useAuth();
-    const name = profile?.full_name || "Student";
+    const { user } = useUser();
+    const { profile } = useClerkAuth();
+    const name = profile?.full_name || user?.firstName || "Student";
     
-    // Use Google photo if available, otherwise use generated avatar
-    const photoUrl = user?.user_metadata?.avatar_url || 
-                     user?.user_metadata?.picture || 
+    // Use Clerk photo or generated avatar
+    const photoUrl = user?.imageUrl || 
                      `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`;
 
     return (
@@ -39,7 +40,7 @@ export function DashboardHeader() {
 }
 
 export function ContinueLearning() {
-    const { profile } = useAuth();
+    const { profile } = useClerkAuth();
     const subjects = profile?.selected_subjects || [];
     const hasActivity = subjects.length > 0;
 

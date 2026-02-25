@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { UserPlus, Shield, Check, AlertCircle } from "lucide-react";
 import { apiCall } from "@/lib/api";
+import { useAuth } from "@clerk/nextjs";
 
 export default function AdminDashboard() {
+  const { getToken } = useAuth();
   const [formData, setFormData] = useState({ name: "", email: "", password: "" });
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
@@ -15,11 +17,17 @@ export default function AdminDashboard() {
     setMessage("");
 
     try {
+      const token = await getToken();
+
+      if (!token) {
+        throw new Error("Not authenticated");
+      }
+
       const res = await apiCall("/admin/add-teacher", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": "admin-session-token" // Hardcoded for this demo
+          "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify(formData),
       });
@@ -55,7 +63,7 @@ export default function AdminDashboard() {
               Create Teacher Account
             </h2>
             <p className="text-sm text-gray-500 mt-1">
-              This will create a new user in Supabase with the &apos;teacher&apos; role.
+              This will create a new Clerk user with the &apos;teacher&apos; role.
             </p>
           </div>
 

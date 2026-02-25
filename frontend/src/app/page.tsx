@@ -1,13 +1,25 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
-import { Play, BookOpen, Users, Award, TrendingUp, CheckCircle, ArrowRight, Mail, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
+import { Play, BookOpen, Users, Award, TrendingUp, CheckCircle, ArrowRight, Mail, Facebook, Twitter, Instagram, Linkedin, X } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useAuth } from '@/lib/AuthContext';
+import { SignIn, SignUp, useUser } from '@clerk/nextjs';
+import { useClerkAuth } from '@/lib/useClerkAuth';
+import StudyPortfolio from '@/components/StudyPortfolio';
 
 export default function HomePage() {
-  const { user, profile } = useAuth();
+  const { user, isLoaded } = useUser();
+  const { profile, signOut } = useClerkAuth();
+  const [authModal, setAuthModal] = useState<"sign-in" | "sign-up" | null>(null);
+
+  // Close modal immediately when user signs in
+  useEffect(() => {
+    if (isLoaded && user) {
+      setAuthModal(null);
+    }
+  }, [user, isLoaded]);
   
   return (
     <main className="min-h-screen bg-white text-slate-900 font-sans selection:bg-brand-pink selection:text-white overflow-x-hidden">
@@ -30,46 +42,151 @@ export default function HomePage() {
             <a href="#features" className="cursor-pointer hover:text-brand-burgundy transition-colors">Features</a>
             <a href="#how-it-works" className="cursor-pointer hover:text-brand-burgundy transition-colors">How It Works</a>
             <Link href="/past-papers" className="cursor-pointer hover:text-brand-burgundy transition-colors">Past Papers</Link>
-            <Link href="/admin/login" className="cursor-pointer hover:text-brand-burgundy transition-colors">Admin</Link>
           </div>
 
           <div className="flex items-center gap-4">
-            {user && profile ? (
-              <Link href={
-                profile.role === "teacher" ? "/teacher/dashboard" :
-                profile.role === "admin" ? "/admin/dashboard" :
-                "/student/dashboard"
-              }>
-                <Button className="bg-brand-red hover:bg-brand-red/90 text-white font-bold rounded-none px-8 h-12 shadow-lg shadow-brand-red/20 text-md transition-transform hover:scale-105 active:scale-95 border-0">
-                  Go to Dashboard
-                </Button>
-              </Link>
-            ) : (
-              <>
-                <Link href="/login" className="hidden md:block font-bold text-slate-700 hover:text-brand-burgundy mr-2">
-                  Log In
-                </Link>
-                <Link href="/signup">
-                  <Button className="bg-brand-red hover:bg-brand-red/90 text-white font-bold rounded-none px-8 h-12 shadow-lg shadow-brand-red/20 text-md transition-transform hover:scale-105 active:scale-95 border-0">
-                    Signup
+            {user ? (
+              <div className="flex items-center gap-3">
+                <Link href={
+                  (profile?.role === "teacher" || user.publicMetadata?.role === "teacher") ? "/teacher/dashboard" :
+                  (profile?.role === "admin" || user.publicMetadata?.role === "admin") ? "/admin/dashboard" :
+                  "/student/dashboard"
+                }>
+                  <Button className="bg-brand-red hover:bg-brand-red/90 text-white font-bold rounded-none px-8 h-12 shadow-lg shadow-brand-red/20 text-md transition-transform hover:scale-105 active:scale-95 border-0 flex items-center gap-2">
+                    <span>
+                      {(profile?.role === "teacher" || user.publicMetadata?.role === "teacher") ? "Teacher Dashboard" : 
+                       (profile?.role === "admin" || user.publicMetadata?.role === "admin") ? "Admin Dashboard" : 
+                       "Student Dashboard"}
+                    </span>
+                    <span className="text-xs opacity-75">
+                      ({profile?.full_name || user.fullName || user.firstName || "User"})
+                    </span>
                   </Button>
                 </Link>
-              </>
+                <button
+                  onClick={() => signOut()}
+                  className="font-bold text-slate-700 hover:text-brand-red transition-colors px-4 h-12 flex items-center"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setAuthModal("sign-in")}
+                  className="font-bold text-slate-700 hover:text-brand-burgundy"
+                >
+                  Log In
+                </button>
+                <Button
+                  onClick={() => setAuthModal("sign-up")}
+                  className="bg-brand-red hover:bg-brand-red/90 text-white font-bold rounded-none px-8 h-12 shadow-lg shadow-brand-red/20 text-md transition-transform hover:scale-105 active:scale-95 border-0"
+                >
+                  Signup
+                </Button>
+              </div>
             )}
           </div>
         </div>
       </motion.nav>
 
+      {authModal && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 backdrop-blur-sm px-4" onClick={() => setAuthModal(null)}>
+          <div className="relative w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => setAuthModal(null)}
+              className="absolute -right-2 -top-2 z-10 bg-white rounded-full p-2 text-slate-700 hover:bg-brand-red hover:text-white transition-all shadow-lg"
+              aria-label="Close authentication modal"
+            >
+              <X size={20} />
+            </button>
+
+            <div className="mb-3 flex items-center gap-2 justify-center">
+              <button
+                onClick={() => setAuthModal("sign-in")}
+                className={`rounded-lg px-6 py-2.5 text-sm font-bold transition-all ${authModal === "sign-in" ? "bg-brand-burgundy text-white shadow-lg scale-105" : "bg-white/90 text-slate-700 hover:bg-white"}`}
+              >
+                Log In
+              </button>
+              <button
+                onClick={() => setAuthModal("sign-up")}
+                className={`rounded-lg px-6 py-2.5 text-sm font-bold transition-all ${authModal === "sign-up" ? "bg-brand-red text-white shadow-lg scale-105" : "bg-white/90 text-slate-700 hover:bg-white"}`}
+              >
+                Sign Up
+              </button>
+            </div>
+
+            <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border-2 border-slate-200 overflow-hidden">
+              {authModal === "sign-in" ? (
+                <SignIn
+                  routing="hash"
+                  signUpUrl="/"
+                  afterSignInUrl="/"
+                  fallbackRedirectUrl="/"
+                  forceRedirectUrl="/"
+                  appearance={{
+                    elements: {
+                      card: "shadow-none border-0 bg-transparent",
+                      rootBox: "w-full",
+                      cardBox: "shadow-none w-full",
+                      main: "w-full",
+                      identityPreview: "hidden",
+                      identityPreviewText: "hidden",
+                      identityPreviewEditButton: "hidden",
+                      footerAction: "hidden",
+                      formButtonPrimary: "bg-brand-burgundy hover:bg-brand-burgundy/90 text-white font-bold",
+                      formFieldInput: "rounded-lg border-2 border-slate-200 focus:border-brand-burgundy",
+                      headerTitle: "text-brand-burgundy font-black text-2xl",
+                      headerSubtitle: "text-slate-500",
+                      socialButtonsBlockButton: "border-2 border-slate-300 hover:border-brand-burgundy transition-all",
+                      dividerLine: "bg-slate-300",
+                      dividerText: "text-slate-500",
+                    },
+                  }}
+                />
+              ) : (
+                <SignUp
+                  routing="hash"
+                  signInUrl="/"
+                  afterSignUpUrl="/"
+                  fallbackRedirectUrl="/"
+                  forceRedirectUrl="/"
+                  appearance={{
+                    elements: {
+                      card: "shadow-none border-0 bg-transparent",
+                      rootBox: "w-full",
+                      cardBox: "shadow-none w-full",
+                      main: "w-full",
+                      identityPreview: "hidden",
+                      identityPreviewText: "hidden",
+                      identityPreviewEditButton: "hidden",
+                      footerAction: "hidden",
+                      formButtonPrimary: "bg-brand-red hover:bg-brand-red/90 text-white font-bold",
+                      formFieldInput: "rounded-lg border-2 border-slate-200 focus:border-brand-red",
+                      headerTitle: "text-brand-red font-black text-2xl",
+                      headerSubtitle: "text-slate-500",
+                      socialButtonsBlockButton: "border-2 border-slate-300 hover:border-brand-red transition-all",
+                      dividerLine: "bg-slate-300",
+                      dividerText: "text-slate-500",
+                    },
+                  }}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Hero Section */}
-      <section className="flex-grow flex flex-col lg:flex-row items-center justify-between px-6 md:px-12 py-20 max-w-[1400px] mx-auto w-full gap-16 lg:gap-8">
+      <section className="flex-grow flex flex-col lg:flex-row items-center justify-between px-6 md:px-12 py-16 max-w-[1320px] mx-auto w-full gap-12 lg:gap-8">
         {/* Left Content */}
         <motion.div
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="flex-1 space-y-12 max-w-2xl"
+          className="flex-1 space-y-10 max-w-xl"
         >
-          <h1 className="text-6xl md:text-7xl lg:text-8xl font-black leading-[0.95] tracking-tight text-slate-900">
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-[0.95] tracking-tight text-slate-900">
             Propel Your Success<br />
             in <span className="text-brand-pink">O Levels</span><br />
             with <span className="text-brand-pink">Expert Teachers</span>
@@ -85,10 +202,10 @@ export default function HomePage() {
             transition={{ delay: 0.6 }}
             className="flex items-center gap-4"
           >
-            {user && profile ? (
+            {user ? (
               <Link href={
-                profile.role === "teacher" ? "/teacher/dashboard" :
-                profile.role === "admin" ? "/admin/dashboard" :
+                (profile?.role === "teacher" || user.publicMetadata?.role === "teacher") ? "/teacher/dashboard" :
+                (profile?.role === "admin" || user.publicMetadata?.role === "admin") ? "/admin/dashboard" :
                 "/student/dashboard"
               }>
                 <Button className="bg-brand-burgundy hover:bg-brand-burgundy/90 text-white font-bold rounded-none px-10 h-14 shadow-xl shadow-brand-burgundy/30 text-lg transition-all hover:scale-105 active:scale-95">
@@ -97,16 +214,18 @@ export default function HomePage() {
               </Link>
             ) : (
               <>
-                <Link href="/signup">
-                  <Button className="bg-brand-burgundy hover:bg-brand-burgundy/90 text-white font-bold rounded-none px-10 h-14 shadow-xl shadow-brand-burgundy/30 text-lg transition-all hover:scale-105 active:scale-95">
-                    Get Started <ArrowRight className="ml-2" size={20} />
-                  </Button>
-                </Link>
-                <Link href="/login">
-                  <Button className="bg-transparent border-2 border-brand-burgundy text-brand-burgundy hover:bg-brand-burgundy hover:text-white font-bold rounded-none px-10 h-14 text-lg transition-all">
-                    Explore
-                  </Button>
-                </Link>
+                <Button 
+                  onClick={() => setAuthModal("sign-up")}
+                  className="bg-brand-burgundy hover:bg-brand-burgundy/90 text-white font-bold rounded-none px-10 h-14 shadow-xl shadow-brand-burgundy/30 text-lg transition-all hover:scale-105 active:scale-95"
+                >
+                  Get Started <ArrowRight className="ml-2" size={20} />
+                </Button>
+                <Button 
+                  onClick={() => setAuthModal("sign-in")}
+                  className="bg-transparent border-2 border-brand-burgundy text-brand-burgundy hover:bg-brand-burgundy hover:text-white font-bold rounded-none px-10 h-14 text-lg transition-all"
+                >
+                  Explore
+                </Button>
               </>
             )}
           </motion.div>
@@ -133,64 +252,14 @@ export default function HomePage() {
           </motion.div>
         </motion.div>
 
-        {/* Right Content - Geometric Grid */}
+        {/* Right Content - Study Portfolio */}
         <motion.div
           initial={{ x: 100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="flex-1 w-full max-w-[600px] aspect-square relative transform scale-95 lg:scale-100"
+          className="flex-1 w-full max-w-[520px] aspect-square relative"
         >
-          <div className="w-full h-full grid grid-cols-2 grid-rows-2 p-4 gap-0">
-            {/* Top Left Quadrant - Burgundy Semi-circle Block */}
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              transition={{ type: "spring", stiffness: 300 }}
-              className="relative w-full h-full"
-            >
-              <div className="absolute top-0 right-0 w-[90%] h-[90%] bg-brand-burgundy rounded-tl-[100px] rounded-br-none rounded-bl-none rounded-tr-[40px]" />
-            </motion.div>
-
-            {/* Top Right Quadrant - Red Diamond & Pink Side */}
-            <div className="relative w-full h-full">
-              <motion.div
-                animate={{ rotate: [45, 50, 45] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute top-[10%] -left-[15%] w-[45%] h-[45%] bg-brand-red rotate-45 transform z-20 shadow-xl"
-              />
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                className="absolute top-0 right-0 w-[85%] h-[200%] bg-brand-pink rounded-tr-[160px] rounded-br-[160px] z-10"
-              />
-            </div>
-
-            {/* Bottom Left Quadrant - Square, Circle, Triangle */}
-            <div className="relative w-full h-full">
-              <motion.div
-                whileHover={{ rotate: 5 }}
-                className="absolute top-[10%] right-[10%] w-[60%] h-[60%] border-[20px] border-brand-pink bg-white z-30"
-              />
-              <motion.div
-                animate={{ scale: [1, 1.1, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="absolute -top-[15%] -right-[15%] w-[50%] h-[50%] bg-brand-light rounded-full z-20"
-              />
-              <div className="absolute bottom-[5%] right-[5%] w-[70%] h-[70%] bg-slate-50/80 rounded-full -z-10" />
-              <div className="absolute bottom-0 right-[-40%] w-full h-full flex items-end justify-center z-40 pointer-events-none">
-                <div className="w-0 h-0 border-l-[60px] border-l-transparent border-r-[60px] border-r-transparent border-b-[100px] border-b-brand-blue/30" />
-              </div>
-            </div>
-
-            {/* Bottom Right Quadrant - Yellow Quarter & Triangle Overlay */}
-            <div className="relative w-full h-full z-0">
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                className="absolute bottom-0 right-0 w-[85%] h-[85%] bg-brand-yellow rounded-tl-[120px]"
-              />
-              <div className="absolute bottom-0 left-[-20%] w-[60%] h-[60%] z-40">
-                <div className="w-full h-full border-[16px] border-brand-light transform rotate-45" style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }} />
-              </div>
-            </div>
-          </div>
+          <StudyPortfolio />
         </motion.div>
       </section>
 
@@ -326,13 +395,13 @@ export default function HomePage() {
           viewport={{ once: true }}
           className="max-w-[1400px] mx-auto text-center"
         >
-          {user && profile ? (
+          {user ? (
             <>
-              <h2 className="text-5xl md:text-6xl font-black mb-6">Welcome Back, <span className="text-brand-pink">{profile.full_name?.split(' ')[0] || 'Student'}</span>!</h2>
+              <h2 className="text-5xl md:text-6xl font-black mb-6">Welcome Back, <span className="text-brand-pink">{profile?.full_name?.split(' ')[0] || user.firstName || 'Student'}</span>!</h2>
               <p className="text-xl text-slate-400 mb-10 max-w-2xl mx-auto">Continue your learning journey and achieve your goals</p>
               <Link href={
-                profile.role === "teacher" ? "/teacher/dashboard" :
-                profile.role === "admin" ? "/admin/dashboard" :
+                (profile?.role === "teacher" || user.publicMetadata?.role === "teacher") ? "/teacher/dashboard" :
+                (profile?.role === "admin" || user.publicMetadata?.role === "admin") ? "/admin/dashboard" :
                 "/student/dashboard"
               }>
                 <Button className="bg-brand-pink hover:bg-brand-pink/90 text-white font-bold rounded-none px-12 h-16 shadow-xl shadow-brand-pink/30 text-xl transition-all hover:scale-105">
@@ -344,11 +413,12 @@ export default function HomePage() {
             <>
               <h2 className="text-5xl md:text-6xl font-black mb-6">Ready to <span className="text-brand-pink">Propel</span> Your Success?</h2>
               <p className="text-xl text-slate-400 mb-10 max-w-2xl mx-auto">Join thousands of students achieving their dream grades</p>
-              <Link href="/signup">
-                <Button className="bg-brand-pink hover:bg-brand-pink/90 text-white font-bold rounded-none px-12 h-16 shadow-xl shadow-brand-pink/30 text-xl transition-all hover:scale-105">
-                  Start Learning Today <ArrowRight className="ml-2" size={24} />
-                </Button>
-              </Link>
+              <Button 
+                onClick={() => setAuthModal("sign-up")}
+                className="bg-brand-pink hover:bg-brand-pink/90 text-white font-bold rounded-none px-12 h-16 shadow-xl shadow-brand-pink/30 text-xl transition-all hover:scale-105"
+              >
+                Start Learning Today <ArrowRight className="ml-2" size={24} />
+              </Button>
             </>
           )}
         </motion.div>
@@ -373,8 +443,6 @@ export default function HomePage() {
             <div>
               <h3 className="text-lg font-bold mb-4">Quick Links</h3>
               <ul className="space-y-2 text-slate-400">
-                <li><Link href="/login" className="hover:text-brand-pink transition-colors">Login</Link></li>
-                <li><Link href="/signup" className="hover:text-brand-pink transition-colors">Sign Up</Link></li>
                 <li><a href="#features" className="hover:text-brand-pink transition-colors">Features</a></li>
                 <li><a href="#how-it-works" className="hover:text-brand-pink transition-colors">How It Works</a></li>
               </ul>

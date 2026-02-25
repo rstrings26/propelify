@@ -2,30 +2,32 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useUser } from "@clerk/nextjs";
+import { useClerkAuth } from "@/lib/useClerkAuth";
 
 export default function TeacherLayout({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const [isAuthorized, setIsAuthorized] = useState(false);
+    const { user, isLoaded } = useUser();
+    const { profile, loading } = useClerkAuth();
 
     useEffect(() => {
-        // Check if user is logged in and has teacher role
-        const checkAuth = async () => {
-            // For now, we'll use a simple localStorage check
-            // In production, verify with backend
-            const userRole = localStorage.getItem("userRole");
+        if (!isLoaded || loading) return;
 
-            if (userRole !== "teacher") {
-                router.push("/login");
-                return;
-            }
+        if (!user) {
+            router.replace("/sign-in");
+            return;
+        }
 
-            setIsAuthorized(true);
-        };
+        if (!profile || profile.role !== "teacher") {
+            router.replace("/");
+            return;
+        }
 
-        checkAuth();
-    }, [router]);
+        setIsAuthorized(true);
+    }, [isLoaded, loading, user, profile, router]);
 
-    if (!isAuthorized) {
+    if (!isLoaded || loading || !isAuthorized) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
                 <div className="text-center">

@@ -15,7 +15,7 @@ import {
     Home
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { useAuth } from "@/lib/AuthContext";
+import { useClerk } from "@clerk/nextjs";
 
 const navItems = [
     { name: "Home", href: "/", icon: Home },
@@ -29,12 +29,12 @@ const navItems = [
 
 export default function StudentSidebar({ isOpen, onClose }: { isOpen?: boolean, onClose?: () => void }) {
     const pathname = usePathname();
-    const { signOut } = useAuth();
+    const { signOut } = useClerk();
 
     const handleLogout = async () => {
         try {
             console.log("Logging out...");
-            await signOut();
+            await signOut({ redirectUrl: "/" });
             console.log("Logout successful");
         } catch (error) {
             console.error("Logout error:", error);

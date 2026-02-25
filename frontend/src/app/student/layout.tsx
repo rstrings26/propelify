@@ -4,11 +4,11 @@ import React, { useState } from 'react';
 import StudentSidebar from '@/components/student/Sidebar';
 import GeometricShapes from '@/components/ui/GeometricShapes';
 import { Menu } from 'lucide-react';
-import { useAuth } from '@/lib/AuthContext';
+import { useClerkAuth } from '@/lib/useClerkAuth';
 
 export default function StudentLayout({ children }: { children: React.ReactNode }) {
 	const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-	const { loading } = useAuth();
+	const { loading } = useClerkAuth();
 
 	// Quick fix for mobile default closed:
 	React.useEffect(() => {

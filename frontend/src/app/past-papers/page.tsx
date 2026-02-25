@@ -5,10 +5,12 @@ import Link from "next/link";
 import { 
     FileText, Download, Eye, Search, Loader2, ChevronRight, ChevronDown,
     Atom, Beaker, Calculator, BookOpen, Globe, Dna, FlaskConical, Languages,
-    Calendar, FolderOpen, FileCheck, ClipboardList, BookMarked, Home, LogIn
+    Calendar, FolderOpen, FileCheck, ClipboardList, BookMarked, Home, LogIn, X
 } from "lucide-react";
-import { useAuth } from "@/lib/AuthContext";
+import { useClerkAuth } from "@/lib/useClerkAuth";
+import { useUser } from "@clerk/nextjs";
 import { apiCall } from "@/lib/api";
+import { SignIn, SignUp } from "@clerk/nextjs";
 
 interface FolderItem {
     id: string;
@@ -28,7 +30,9 @@ interface FolderCache {
 }
 
 export default function PublicPastPapersPage() {
-    const { user, profile } = useAuth();
+    const { user, isLoaded } = useUser();
+    const { profile } = useClerkAuth();
+    const [authModal, setAuthModal] = useState<"sign-in" | "sign-up" | null>(null);
     const [rootFolderId, setRootFolderId] = useState<string | null>(null);
     const [folderCache, setFolderCache] = useState<FolderCache>({});
     const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
@@ -37,6 +41,13 @@ export default function PublicPastPapersPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [initialLoading, setInitialLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    // Close auth modal when user signs in
+    useEffect(() => {
+        if (isLoaded && user) {
+            setAuthModal(null);
+        }
+    }, [user, isLoaded]);
 
     // Navigation component
     const Navigation = () => (
@@ -57,10 +68,10 @@ export default function PublicPastPapersPage() {
                             Dashboard
                         </Link>
                     ) : (
-                        <Link href="/login" className="flex items-center gap-2 px-4 py-2 bg-brand-burgundy text-white rounded-lg hover:bg-brand-burgundy/90 font-semibold">
+                        <button onClick={() => setAuthModal("sign-in")} className="flex items-center gap-2 px-4 py-2 bg-brand-burgundy text-white rounded-lg hover:bg-brand-burgundy/90 font-semibold">
                             <LogIn size={18} />
                             Login
-                        </Link>
+                        </button>
                     )}
                 </div>
             </div>
@@ -388,10 +399,10 @@ export default function PublicPastPapersPage() {
                                 <Home size={18} />
                                 Home
                             </Link>
-                            <Link href="/login" className="flex items-center gap-2 px-4 py-2 bg-brand-burgundy text-white rounded-lg hover:bg-brand-burgundy/90 font-semibold">
+                            <button onClick={() => setAuthModal("sign-in")} className="flex items-center gap-2 px-4 py-2 bg-brand-burgundy text-white rounded-lg hover:bg-brand-burgundy/90 font-semibold">
                                 <LogIn size={18} />
                                 Login
-                            </Link>
+                            </button>
                         </div>
                     </div>
                 </nav>
@@ -447,10 +458,10 @@ export default function PublicPastPapersPage() {
                                 Dashboard
                             </Link>
                         ) : (
-                            <Link href="/login" className="flex items-center gap-2 px-4 py-2 bg-brand-burgundy text-white rounded-lg hover:bg-brand-burgundy/90 font-semibold">
+                            <button onClick={() => setAuthModal("sign-in")} className="flex items-center gap-2 px-4 py-2 bg-brand-burgundy text-white rounded-lg hover:bg-brand-burgundy/90 font-semibold">
                                 <LogIn size={18} />
                                 Login
-                            </Link>
+                            </button>
                         )}
                     </div>
                 </div>
@@ -514,9 +525,9 @@ export default function PublicPastPapersPage() {
                             <h3 className="text-xl font-bold mb-2">Want to track your progress?</h3>
                             <p className="text-white/90">Sign up for a free account to bookmark papers, track your learning, and get personalized recommendations.</p>
                         </div>
-                        <Link href="/signup" className="px-6 py-3 bg-white text-brand-burgundy font-bold rounded-lg hover:bg-gray-100 transition-colors whitespace-nowrap">
+                        <button onClick={() => setAuthModal("sign-up")} className="px-6 py-3 bg-white text-brand-burgundy font-bold rounded-lg hover:bg-gray-100 transition-colors whitespace-nowrap">
                             Sign Up Free
-                        </Link>
+                        </button>
                     </div>
                 )}
 
@@ -539,6 +550,94 @@ export default function PublicPastPapersPage() {
                     )}
                 </div>
             </div>
+
+            {/* Auth Modal */}
+            {authModal && (
+                <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 backdrop-blur-sm px-4" onClick={() => setAuthModal(null)}>
+                    <div className="relative w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+                        <button
+                            onClick={() => setAuthModal(null)}
+                            className="absolute -right-2 -top-2 z-10 bg-white rounded-full p-2 text-slate-700 hover:bg-brand-red hover:text-white transition-all shadow-lg"
+                            aria-label="Close authentication modal"
+                        >
+                            <X size={20} />
+                        </button>
+
+                        <div className="mb-3 flex items-center gap-2 justify-center">
+                            <button
+                                onClick={() => setAuthModal("sign-in")}
+                                className={`rounded-lg px-6 py-2.5 text-sm font-bold transition-all ${authModal === "sign-in" ? "bg-brand-burgundy text-white shadow-lg scale-105" : "bg-white/90 text-slate-700 hover:bg-white"}`}
+                            >
+                                Log In
+                            </button>
+                            <button
+                                onClick={() => setAuthModal("sign-up")}
+                                className={`rounded-lg px-6 py-2.5 text-sm font-bold transition-all ${authModal === "sign-up" ? "bg-brand-red text-white shadow-lg scale-105" : "bg-white/90 text-slate-700 hover:bg-white"}`}
+                            >
+                                Sign Up
+                            </button>
+                        </div>
+
+                        <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border-2 border-slate-200 overflow-hidden">
+                            {authModal === "sign-in" ? (
+                                <SignIn
+                                    routing="hash"
+                                    signUpUrl="/"
+                                    afterSignInUrl="/past-papers"
+                                    fallbackRedirectUrl="/past-papers"
+                                    forceRedirectUrl="/past-papers"
+                                    appearance={{
+                                        elements: {
+                                            card: "shadow-none border-0 bg-transparent",
+                                            rootBox: "w-full",
+                                            cardBox: "shadow-none w-full",
+                                            main: "w-full",
+                                            identityPreview: "hidden",
+                                            identityPreviewText: "hidden",
+                                            identityPreviewEditButton: "hidden",
+                                            footerAction: "hidden",
+                                            formButtonPrimary: "bg-brand-burgundy hover:bg-brand-burgundy/90 text-white font-bold",
+                                            formFieldInput: "rounded-lg border-2 border-slate-200 focus:border-brand-burgundy",
+                                            headerTitle: "text-brand-burgundy font-black text-2xl",
+                                            headerSubtitle: "text-slate-500",
+                                            socialButtonsBlockButton: "border-2 border-slate-300 hover:border-brand-burgundy transition-all",
+                                            dividerLine: "bg-slate-300",
+                                            dividerText: "text-slate-500",
+                                        },
+                                    }}
+                                />
+                            ) : (
+                                <SignUp
+                                    routing="hash"
+                                    signInUrl="/"
+                                    afterSignUpUrl="/past-papers"
+                                    fallbackRedirectUrl="/past-papers"
+                                    forceRedirectUrl="/past-papers"
+                                    appearance={{
+                                        elements: {
+                                            card: "shadow-none border-0 bg-transparent",
+                                            rootBox: "w-full",
+                                            cardBox: "shadow-none w-full",
+                                            main: "w-full",
+                                            identityPreview: "hidden",
+                                            identityPreviewText: "hidden",
+                                            identityPreviewEditButton: "hidden",
+                                            footerAction: "hidden",
+                                            formButtonPrimary: "bg-brand-red hover:bg-brand-red/90 text-white font-bold",
+                                            formFieldInput: "rounded-lg border-2 border-slate-200 focus:border-brand-red",
+                                            headerTitle: "text-brand-red font-black text-2xl",
+                                            headerSubtitle: "text-slate-500",
+                                            socialButtonsBlockButton: "border-2 border-slate-300 hover:border-brand-red transition-all",
+                                            dividerLine: "bg-slate-300",
+                                            dividerText: "text-slate-500",
+                                        },
+                                    }}
+                                />
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
